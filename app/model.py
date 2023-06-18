@@ -1,5 +1,5 @@
 import psycopg2
-from config.py import db_cred
+from config import db_cred
 
 
 class Model:
