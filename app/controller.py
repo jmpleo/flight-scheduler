@@ -3,9 +3,12 @@ from view import View
 
 
 class Controller:
-    def __init__(self):
-        self.model = Model()
-        self.view = View()
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
+        self.buttonAdd["command"] = self.addData
+        self.buttonDel["command"] = self.delData
+        self.buttonUpd["command"] = self.updData
 
     def handle_request(self, request):
         parts = request.split()

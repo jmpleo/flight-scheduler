@@ -20,9 +20,18 @@ class Model:
 
     def set_schedule(self, flight_id, date):
         self.cur.execute(
-            "INSERT INTO schedule(flight, departure) VALUES (%s,%s)",
+            "INSERT INTO schedule(flight, departure) VALUES (%s,%s) "
+            "ON CONFLICT (flight, departure) DO NOTHING",
             (flight_id, date)
         )
+
+    def del_schedule(self, schedule_id):
+        self.cur.execute(
+            "SELECT * FROM schedule WHERE id=%s FOR UPDATE;", (schedule_id,)
+        )
+        result = self.cur.fetchone()
+        return result.
+
 
     def get_schedule(self, schedule_id):
         self.cur.execute(
@@ -35,3 +44,5 @@ class Model:
         )
         result = self.cur.fetchone()
         return result
+
+
