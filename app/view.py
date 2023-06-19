@@ -8,11 +8,14 @@ class View:
         self.root.resizable(False, False)
         self.root.title("Расписание рейсов")
 
-    def ModifyForm(self, tabs_data):
-        pass
+    def ModifyForm(self, data):
+        print(data)
+        return
 
-    def RegistrationForm(self):
-        pass
+    def RegistrationForm(self, data):
+        print(data)
+        return
+
 
     # tab_data: {
     #   'tabs_name' : {
@@ -21,6 +24,8 @@ class View:
     #   }
     # }
     def TabControl(self, tabs_data):
+        print(tabs_data)
+        return
         tab_control = ttk.Notebook(self.root)
         for tab_name in tabs_data:
             frame = ttk.Frame(tab_control)

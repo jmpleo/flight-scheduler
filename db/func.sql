@@ -1,46 +1,478 @@
-CREATE FUNCTION add_city (NAME VARCHAR(50)) RETURNS VOID AS $$ BEGIN
-INSERT INTO
-  city (NAME)
-VALUES
-  (NAME);
-
-END;
-
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION update_airport_name (new_name VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+CREATE
+OR REPLACE FUNCTION update_city(id INTEGER, name VARCHAR(50)) RETURNS VOID AS $$  BEGIN
 UPDATE
-  airport
+    city
 SET
-  NAME = new_name
+    name = $2
 WHERE
-  iata_code = 'SVO';
+    id = $1;
 
 END;
 
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION delete_airline () RETURNS VOID AS $$ BEGIN
-DELETE FROM
-  airline
-WHERE
-  iata_code = 'AA';
-
-END;
-
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION add_aircraft (model VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+CREATE
+OR REPLACE FUNCTION add_city(name VARCHAR(50)) RETURNS VOID AS $$  BEGIN
 INSERT INTO
-  aircraft (model)
+    city (name)
 VALUES
-  (model);
+    (name);
 
 END;
 
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION add_flight (
+CREATE
+OR REPLACE FUNCTION delete_city(id INTEGER) RETURNS VOID AS $$  BEGIN
+DELETE FROM
+    city
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_airport(iata_code CHAR(3), name VARCHAR(50), city_id INT) RETURNS VOID AS $$ BEGIN
+UPDATE
+    airport
+SET
+    name = $2,
+    city_id = $3
+WHERE
+    iata_code = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_airport(iata_code CHAR(3), name VARCHAR(50), city_id INT) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    airport (iata_code, name, city_id)
+VALUES
+    (iata_code, name, city_id);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_airport(iata_code CHAR(3)) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    airport
+WHERE
+    iata_code = iata_code;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_airline(
+  iata_code CHAR(2),
+  name VARCHAR(50),
+  website VARCHAR(50)
+) RETURNS VOID AS $$  BEGIN
+UPDATE
+    airline
+SET
+    name = $2,
+    website = $3
+WHERE
+    iata_code = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_airline(
+  iata_code CHAR(2),
+  name VARCHAR(50),
+  website VARCHAR(50)
+) RETURNS VOID AS $$  BEGIN
+INSERT INTO
+    airline (iata_code, name, website)
+VALUES
+    (iata_code, name, website);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_airline(iata_code CHAR(2)) RETURNS VOID AS $$  BEGIN
+DELETE FROM
+    airline
+WHERE
+    iata_code = iata_code;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_aircraft(id INTEGER, model VARCHAR(50)) RETURNS VOID AS $$  BEGIN
+UPDATE
+    aircraft
+SET
+    model = $2
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_aircraft(model VARCHAR(50)) RETURNS VOID AS $$  BEGIN
+INSERT INTO
+    aircraft (model)
+VALUES
+    (model);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_aircraft(id INTEGER) RETURNS VOID AS $$  BEGIN
+DELETE FROM
+    aircraft
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_flight(
+  id INTEGER,
+  flight_number INT,
+  aircraft_id INT,
+  airline_code CHAR(2),
+  to_airport CHAR(3),
+  from_airport CHAR(3)
+) RETURNS VOID AS $$  BEGIN
+UPDATE
+    flight
+SET
+    flight_number = $2,
+    aircraft_id = $3,
+    airline_code = $4,
+    to_airport = $5,
+    from_airport = $6
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_flight(
+  flight_number INT,
+  aircraft_id INT,
+  airline_code CHAR(2),
+  to_airport CHAR(3),
+  from_airport CHAR(3)
+) RETURNS VOID AS $$  BEGIN
+INSERT INTO
+    flight (
+        flight_number,
+        aircraft_id,
+        airline_code,
+        to_airport,
+        from_airport
+    )
+VALUES
+    (
+        flight_number,
+        aircraft_id,
+        airline_code,
+        to_airport,
+        from_airport
+    );
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_flight(id INTEGER) RETURNS VOID AS $$  BEGIN
+DELETE FROM
+    flight
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_schedule(id INTEGER, flight INT, departure TIMESTAMP) RETURNS VOID AS $$  BEGIN
+UPDATE
+    schedule
+SET
+    flight = $2,
+    departure = $3
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_schedule(flight INT, departure TIMESTAMP) RETURNS VOID AS $$  BEGIN
+INSERT INTO
+    schedule (flight, departure)
+VALUES
+    (flight, departure);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_schedule(id INTEGER) RETURNS VOID AS $$  BEGIN
+DELETE FROM
+    schedule
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_status(
+  id INT,
+  gate INT,
+  check_in INT,
+  takeoff TIMESTAMP,
+  arrival TIMESTAMP
+) RETURNS VOID AS $$  BEGIN
+UPDATE
+    status
+SET
+    gate = $2,
+    check_in = $3,
+    takeoff = $4,
+    arrival = $5
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_status(
+  id INT,
+  gate INT,
+  check_in INT,
+  takeoff TIMESTAMP,
+  arrival TIMESTAMP
+) RETURNS VOID AS $$  BEGIN
+INSERT INTO
+    status (id, gate, check_in, takeoff, arrival)
+VALUES
+    (id, gate, check_in, takeoff, arrival);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_status(id INT) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    status
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_city(id INTEGER, name VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+UPDATE
+    city
+SET
+    name = $2
+WHERE
+    id = $1;
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_city(name VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    city (name)
+VALUES
+    (name);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_city(id INTEGER) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    city
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_airport(iata_code CHAR(3), name VARCHAR(50), city_id INT) RETURNS VOID AS $$ BEGIN
+UPDATE
+    airport
+SET
+    name = $2,
+    city_id = $3
+WHERE
+    iata_code = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_airport(iata_code CHAR(3), name VARCHAR(50), city_id INT) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    airport (iata_code, name, city_id)
+VALUES
+    (iata_code, name, city_id);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_airport(iata_code CHAR(3)) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    airport
+WHERE
+    iata_code = iata_code;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_airline(
+  iata_code CHAR(2),
+  name VARCHAR(50),
+  website VARCHAR(50)
+) RETURNS VOID AS $$ BEGIN
+UPDATE
+    airline
+SET
+    name = $2,
+    website = $3
+WHERE
+    iata_code = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_airline(
+  iata_code CHAR(2),
+  name VARCHAR(50),
+  website VARCHAR(50)
+) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    airline (iata_code, name, website)
+VALUES
+    (iata_code, name, website);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_airline(iata_code CHAR(2)) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    airline
+WHERE
+    iata_code = iata_code;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_aircraft(id INTEGER, model VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+UPDATE
+    aircraft
+SET
+    model = $2
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_aircraft(model VARCHAR(50)) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    aircraft (model)
+VALUES
+    (model);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_aircraft(id INTEGER) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    aircraft
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_flight(
+  id INTEGER,
+  flight_number INT,
+  aircraft_id INT,
+  airline_code CHAR(2),
+  to_airport CHAR(3),
+  from_airport CHAR(3)
+) RETURNS VOID AS $$ BEGIN
+UPDATE
+    flight
+SET
+    flight_number = $2,
+    aircraft_id = $3,
+    airline_code = $4,
+    to_airport = $5,
+    from_airport = $6
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_flight(
   flight_number INT,
   aircraft_id INT,
   airline_code CHAR(2),
@@ -48,176 +480,226 @@ CREATE FUNCTION add_flight (
   from_airport CHAR(3)
 ) RETURNS VOID AS $$ BEGIN
 INSERT INTO
-  flight (
-    flight_number,
-    aircraft_id,
-    airline_code,
-    to_airport,
-    from_airport
-  )
+    flight (
+        flight_number,
+        aircraft_id,
+        airline_code,
+        to_airport,
+        from_airport
+    )
 VALUES
-  (
-    flight_number,
-    aircraft_id,
-    airline_code,
-    to_airport,
-    from_airport
-  );
+    (
+        flight_number,
+        aircraft_id,
+        airline_code,
+        to_airport,
+        from_airport
+    );
 
 END;
 
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION add_schedule (flight_id INT, departure TIMESTAMP) RETURNS VOID AS $$ BEGIN
-INSERT INTO
-  schedule (flight, departure)
-VALUES
-  (flight_id, departure);
-
-END;
-
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION update_takeoff_time (new_takeoff TIMESTAMP) RETURNS VOID AS $$ BEGIN
-UPDATE
-  STATUS
-SET
-  takeoff = new_takeoff
+CREATE
+OR REPLACE FUNCTION delete_flight(id INTEGER) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    flight
 WHERE
-  id = 1;
+    id = id;
 
 END;
 
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION get_cities () RETURNS TABLE (id INT, NAME VARCHAR(50)) AS $$ BEGIN RETURN QUERY
-SELECT
-  *
-FROM
-  city;
+CREATE
+OR REPLACE FUNCTION update_schedule(id INTEGER, flight INT, departure TIMESTAMP) RETURNS VOID AS $$ BEGIN
+UPDATE
+    schedule
+SET
+    flight = $2,
+    departure = $3
+WHERE
+    id = $1;
 
 END;
 
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION get_flights_with_airports () RETURNS TABLE (
+CREATE
+OR REPLACE FUNCTION add_schedule(flight INT, departure TIMESTAMP) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    schedule (flight, departure)
+VALUES
+    (flight, departure);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_schedule(id INTEGER) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    schedule
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION update_status(
+  id INT,
+  gate INT,
+  check_in INT,
+  takeoff TIMESTAMP,
+  arrival TIMESTAMP
+) RETURNS VOID AS $$ BEGIN
+UPDATE
+    status
+SET
+    gate = $2,
+    check_in = $3,
+    takeoff = $4,
+    arrival = $5
+WHERE
+    id = $1;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION add_status(
+  id INT,
+  gate INT,
+  check_in INT,
+  takeoff TIMESTAMP,
+  arrival TIMESTAMP
+) RETURNS VOID AS $$ BEGIN
+INSERT INTO
+    status (id, gate, check_in, takeoff, arrival)
+VALUES
+    (id, gate, check_in, takeoff, arrival);
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION delete_status(id INT) RETURNS VOID AS $$ BEGIN
+DELETE FROM
+    status
+WHERE
+    id = id;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION get_flight_info(
+  start_time TIMESTAMP DEFAULT NULL,
+  end_time TIMESTAMP DEFAULT NULL,
+  airline_code CHAR(2) DEFAULT NULL,
+  aircraft VARCHAR(50) DEFAULT NULL,
+  from_city VARCHAR(50) DEFAULT NULL,
+  to_city VARCHAR(50) DEFAULT NULL,
+  to_airport_code CHAR(3) DEFAULT NULL,
+  from_airport_code CHAR(3) DEFAULT NULL,
+  check_in INT DEFAULT NULL,
+  gate_number INT DEFAULT NULL
+) RETURNS TABLE(
   flight_number INT,
-  airline_code CHAR(2),
-  from_airport CHAR(3),
-  to_airport CHAR(3),
-  from_airport_name VARCHAR(50),
-  to_airport_name VARCHAR(50)
-) AS $$ BEGIN RETURN QUERY
+  airline_name VARCHAR(50),
+  airline_iata_code VARCHAR(2),
+  aircraft_model VARCHAR(50),
+  from_city_name VARCHAR(50),
+  to_city_name VARCHAR(50),
+  from_airport VARCHAR(3),
+  to_airport VARCHAR(3),
+  departure TIMESTAMP,
+  gate INT,
+  check_in_number INT,
+  takeoff TIMESTAMP,
+  arrival TIMESTAMP
+) AS $$
+BEGIN
+RETURN QUERY
 SELECT
   f.flight_number,
-  f.airline_code,
+  al.name AS airline_name,
+  al.iata_code AS airline_code,
+  ac.model AS aircraft_model,
+  cf.name AS from_city_name,
+  ct.name AS to_city_name,
   f.from_airport,
   f.to_airport,
-  a1.NAME AS from_airport_name,
-  a2.NAME AS to_airport_name
-FROM
-  flight f
-  INNER JOIN airport a1 ON f.from_airport = a1.iata_code
-  INNER JOIN airport a2 ON f.to_airport = a2.iata_code;
-
-END;
-
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION get_flights_with_schedule_and_status () RETURNS TABLE (
-  flight_number INT,
-  airline_code CHAR(2),
-  departure TIMESTAMP,
-  takeoff TIMESTAMP,
-  arrival TIMESTAMP
-) AS $$ BEGIN RETURN QUERY
-SELECT
-  f.flight_number,
-  f.airline_code,
   s.departure,
+  st.gate AS gate_number,
+  st.check_in AS check_in_number,
   st.takeoff,
   st.arrival
 FROM
   flight f
-  INNER JOIN schedule s ON f.id = s.flight
-  INNER JOIN STATUS st ON s.id = st.id;
-
+JOIN airline al ON f.airline_code = al.iata_code
+JOIN aircraft ac ON f.aircraft_id = ac.id
+JOIN airport af ON f.from_airport = af.iata_code
+JOIN airport at ON f.to_airport = at.iata_code
+JOIN city cf ON af.city_id = cf.id
+JOIN city ct ON at.city_id = ct.id
+JOIN schedule s ON f.id = s.flight
+JOIN status st ON s.id = st.id
+WHERE
+  ($1 IS NULL OR s.departure BETWEEN $1 AND $2) AND
+  ($3 IS NULL OR al.iata_code = $3) AND
+  ($4 IS NULL OR ac.model = $4) AND
+  ($5 IS NULL OR cf.name = $5) AND
+  ($6 IS NULL OR ct.name = $6) AND
+  ($7 IS NULL OR f.to_airport = $7) AND
+  ($8 IS NULL OR f.from_airport = $8) AND
+  ($9 IS NULL OR st.check_in = $9) AND
+  ($10 IS NULL OR st.gate = $10);
 END;
 
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE PLPGSQL;
 
-CREATE FUNCTION get_flights_details (start_date TIMESTAMP, end_date TIMESTAMP) RETURNS TABLE (
-  flight_number INT,
-  airline_code CHAR(2),
-  from_airport_name VARCHAR(50),
-  to_airport_name VARCHAR(50),
-  departure TIMESTAMP,
-  takeoff TIMESTAMP,
-  arrival TIMESTAMP,
-  gate INT,
-  check_in INT
-) AS $$ BEGIN RETURN QUERY
+CREATE
+OR REPLACE FUNCTION cancel_flight(flight_id INT) RETURNS VOID AS $$ DECLARE flight_status RECORD;
 
-SELECT
-  f.flight_number,
-  f.airline_code,
-  a1.NAME AS from_airport_name,
-  a2.NAME AS to_airport_name,
-  s.departure,
-  st.takeoff,
-  st.arrival,
-  st.gate,
-  st.check_in
+BEGIN
+SELECT * INTO flight_status
 FROM
-  flight f
-  INNER JOIN airport a1 ON f.from_airport = a1.iata_code
-  INNER JOIN airport a2 ON f.to_airport = a2.iata_code
-  INNER JOIN schedule s ON f.id = s.flight
-  INNER JOIN status st ON s.id = st.id
+    status
 WHERE
-  s.departure BETWEEN start_date AND end_date;
+    id = flight_id;
+IF flight_status.arrival IS NOT NULL THEN RAISE EXCEPTION 'Flight has already landed.';
 
-END;
+END IF;
 
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION filter_flights (
-  flight_number INT DEFAULT NULL,
-  airline_code CHAR(2) DEFAULT NULL,
-  from_airport_name VARCHAR(50) DEFAULT NULL,
-  to_airport_name VARCHAR(50) DEFAULT NULL,
-  start_date TIMESTAMP DEFAULT NULL,
-  end_date TIMESTAMP DEFAULT NULL
-) RETURNS TABLE (
-  flight_number INT,
-  airline_code CHAR(2),
-  from_airport_name VARCHAR(50),
-  to_airport_name VARCHAR(50),
-  departure TIMESTAMP,
-  takeoff TIMESTAMP,
-  arrival TIMESTAMP
-) AS $$ BEGIN RETURN QUERY
-SELECT
-  f.flight_number,
-  f.airline_code,
-  a1.NAME AS from_airport_name,
-  a2.NAME AS to_airport_name,
-  s.departure,
-  st.takeoff,
-  st.arrival
-FROM
-  flight f
-  INNER JOIN airport a1 ON f.from_airport = a1.iata_code
-  INNER JOIN airport a2 ON f.to_airport = a2.iata_code
-  INNER JOIN schedule s ON f.id = s.flight
-  INNER JOIN status st ON s.id = st.id
+UPDATE
+  status
+SET
+  gate = NULL,
+  check_in = NULL,
+  takeoff = NULL,
+  arrival = CAST(
+    (
+      CAST(
+        (
+          SELECT
+              s.departure
+          FROM
+              schedule s
+          WHERE
+              s.flight = flight_id
+        ) AS DATE
+      ) + INTERVAL '1 day'
+    ) AS TIMESTAMP
+  )
 WHERE
-      ( flight_number IS NULL OR f.flight_number = flight_number )
-  AND ( airline_code IS NULL OR f.airline_code = airline_code )
-  AND ( from_airport_name IS NULL OR a1.NAME = from_airport_name )
-  AND ( to_airport_name IS NULL OR a2.NAME = to_airport_name )
-  AND ( start_date IS NULL OR s.departure >= start_date )
-  AND ( end_date IS NULL OR s.departure <= end_date );
+    id = flight_id;
+
 END;
 
 $$ LANGUAGE plpgsql;
