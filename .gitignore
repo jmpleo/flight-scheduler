@@ -1,3 +1,4 @@
 app/template
 db/tmp.sql
-db/trigger.sql
+db/tmp.py
+
