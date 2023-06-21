@@ -9,7 +9,7 @@ $$ LANGUAGE plpgsql;
 
 -- trigger init status after planning flight
 CREATE TRIGGER init_status_after_flight_planning
-AFTER INSERT ON schedule FOR EACH ROW EXECUTE FUNCTION init_status();
+AFTER INSERT ON schedule FOR EACH ROW EXECUTE FUNCTION init_flight_status();
 
 
 -- delete scheduled flight

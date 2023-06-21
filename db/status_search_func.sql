@@ -14,7 +14,7 @@ BEGIN
       st.takeoff,
       st.arrival,
       from_a.iata_code AS from_airport_iata_code,
-      to_a.iata_code AS to_airport_iata_code,
+      to_a.iata_code AS to_airport_iata_code
     FROM status st
       JOIN schedule s ON st.id = s.id
       JOIN flight f ON s.flight = f.id
@@ -52,7 +52,7 @@ BEGIN
       st.check_in,
       st.takeoff,
       st.arrival,
-      from_a.iata_code AS from_airport_iata_code,
+      from_a.iata_code AS from_airport_iata_code
     FROM status st
       JOIN schedule s ON st.id = s.id
       JOIN flight f ON s.flight = f.id
