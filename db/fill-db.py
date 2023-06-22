@@ -1,19 +1,20 @@
 import csv
+import argparse
 import psycopg2
 import random
 from datetime import timedelta, datetime
-
 
 def insert_airlines(cur):
     print('airlines: insterting...', end='')
     with open('data/airlines.csv', mode='r') as airlines:
         airlinesReader = csv.DictReader(airlines)
         for row in airlinesReader:
-            cur.execute(
-                "INSERT INTO airline (iata_code, name) VALUES (%s, %s)",
-                (row['iata_code'], row['name'])
-            )
-    print('\r' + ' '*50, '\rairlines: comleted')
+            cur.callproc('insert_airline', (row['iata_code'], row['name']))
+#            cur.execute(
+#                "INSERT INTO airline (iata_code, name) VALUES (%s, %s)",
+#                (row['iata_code'], row['name'])
+#            )
+    print('comleted')
 
 
 def insert_cities(cur):
@@ -21,11 +22,12 @@ def insert_cities(cur):
     with open('data/cities.csv', mode='r') as cities:
         citiesReader = csv.DictReader(cities)
         for row in citiesReader:
-            cur.execute(
-                "INSERT INTO city (name) VALUES (%s)",
-                (row['name'],)
-            )
-    print('\r' + ' '*50, '\rcities: comleted')
+            cur.callproc('insert_city', (row['name'],))
+#            cur.execute(
+#                "INSERT INTO city (name) VALUES (%s)",
+#                (row['name'],)
+#            )
+    print('comleted')
 
 
 def insert_airports(cur):
@@ -33,12 +35,13 @@ def insert_airports(cur):
     with open('data/airports.csv', mode='r') as airports:
         airportReader = csv.DictReader(airports)
         for row in airportReader:
-            cur.execute(
-                "INSERT INTO airport (iata_code, name, city_id) \
-                VALUES (%s,%s,(SELECT id FROM city WHERE name=%s LIMIT 1))",
-                (row['iata_code'], row['name'], row['city'])
-            )
-    print('\r' + ' '*50, '\rairport: comleted')
+            cur.callproc('insert_airport', (row['iata_code'], row['name'], row['city']))
+#            cur.execute(
+#                "INSERT INTO airport (iata_code, name, city_id) \
+#                VALUES (%s,%s,(SELECT id FROM city WHERE name=%s LIMIT 1))",
+#                (row['iata_code'], row['name'], row['city'])
+#            )
+    print('comleted')
 
 
 def insert_aircrafts(cur):
@@ -46,11 +49,12 @@ def insert_aircrafts(cur):
     with open('data/aircraft.csv', mode='r') as aircraft:
         aircraftReader = csv.DictReader(aircraft)
         for row in aircraftReader:
-            cur.execute(
-                "INSERT INTO aircraft (model) VALUES (%s)",
-                (row['model'],)
-            )
-    print('\r' + ' '*50, '\raircraft: comleted')
+            cur.callproc('insert_aircraft', (row['model'], row['manufacturer']))
+#            cur.execute(
+#                "INSERT INTO aircraft (model, manufacturer) VALUES (%s,%s)",
+#                (row['model'], row['manufacturer'])
+#            )
+    print('comleted')
 
 
 def generate_random_flight(cur, seed):
@@ -78,22 +82,30 @@ def generate_random_flight(cur, seed):
 
 
 def insert_flight(cur, flight):
-    cur.execute(
-        "INSERT INTO flight (\
-            airline_code, \
-            flight_number,\
-            aircraft_id,  \
-            to_airport,   \
-            from_airport  \
-        ) VALUES (%s,%s,%s,%s,%s)\
-        ON CONFLICT (airline_code, flight_number) DO NOTHING", (
-            flight['airline'],
+    cur.callproc('insert_flight_quiet', (
             flight['number'],
             flight['aircraft'],
+            flight['airline'],
             flight['to_airport'],
             flight['from_airport']
         )
     )
+#    cur.execute(
+#        "INSERT INTO flight (\
+#            airline_code, \
+#            flight_number,\
+#            aircraft_id,  \
+#            to_airport,   \
+#            from_airport  \
+#        ) VALUES (%s,%s,%s,%s,%s)\
+#        ON CONFLICT (airline_code, flight_number) DO NOTHING", (
+#            flight['airline'],
+#            flight['number'],
+#            flight['aircraft'],
+#            flight['to_airport'],
+#            flight['from_airport']
+#        )
+#    )
 
 
 def insert_random_flight(cur, count):
@@ -101,7 +113,7 @@ def insert_random_flight(cur, count):
         print(f"\rflight: {i}/{count} insterting...", end='')
         insert_flight(cur, generate_random_flight(cur, seed=i))
 
-    print(f"\rflight: completed {count} records")
+    print("completed")
 
 
 def insert_schedule(cur, count):
@@ -115,8 +127,18 @@ def insert_schedule(cur, count):
             "INSERT INTO schedule (flight, departure) VALUES (%s, %s)",
             (random.choice(flights)[0], departure)
         )
-    print(f"\rschedule: completed {count} records")
+    print("completed")
 
+
+parser = argparse.ArgumentParser(description='filling data into db')
+parser.add_argument('flights', nargs='?', type=int, help='Number of flights to insert')
+parser.add_argument('schedules', nargs='?', type=int, help='Number of schedule records to insert')
+parser.add_argument('--flights', dest='flights_named', type=int, help='Number of flights to insert')
+parser.add_argument('--schedules', dest='schedules_named', type=int, help='Number of schedule records to insert')
+args = parser.parse_args()
+
+flights_count = args.flights or args.flights_named
+schedules_count = args.schedules or args.schedules_named
 
 conn = psycopg2.connect(
     host="localhost",
@@ -126,12 +148,6 @@ conn = psycopg2.connect(
 )
 
 cur = conn.cursor()
-
-print("How many flights? : ", end='')
-flights_count = int(input())
-
-print("How many schedule recors? : ", end='')
-schedules_count = int(input())
 
 insert_aircrafts(cur)
 insert_cities(cur)

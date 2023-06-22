@@ -45,14 +45,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_aircraft(model VARCHAR(50))
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION insert_aircraft(
+  model VARCHAR(50), manufacturer VARCHAR(50)
+) RETURNS VOID AS $$
 BEGIN
   LOCK TABLE aircraft IN SHARE ROW EXCLUSIVE MODE;
   BEGIN
-    INSERT INTO aircraft (model) VALUES (model);
+    INSERT INTO aircraft (model, manufacturer) VALUES (model, manufacturer);
   EXCEPTION WHEN unique_violation THEN
-    RAISE EXCEPTION 'Самолет с такой моделью уже существует';
+    RAISE EXCEPTION 'Модель уже существует';
   END;
 END;
 $$ LANGUAGE plpgsql;
@@ -84,7 +85,37 @@ BEGIN
     WHEN unique_violation THEN
       RAISE EXCEPTION 'Рейс с таким номером для этой авиалинии уже существует';
     WHEN foreign_key_violation THEN
-      RAISE EXCEPTION 'Авиалиния или аэропорт с таким кодом не существует';
+      RAISE EXCEPTION 'Авиалиния или аэропорт не существует';
+  END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insert_flight_quiet (
+  flight_number INT,
+  aircraft_id INT,
+  airline_code CHAR(2),
+  to_airport CHAR(3),
+  from_airport CHAR(3)
+) RETURNS VOID AS $$
+BEGIN
+  LOCK TABLE flight IN SHARE ROW EXCLUSIVE MODE;
+  BEGIN
+    INSERT INTO flight (
+      flight_number,
+      aircraft_id,
+      airline_code,
+      to_airport,
+      from_airport
+    ) VALUES (
+      flight_number,
+      aircraft_id,
+      airline_code,
+      to_airport,
+      from_airport
+    ) ON CONFLICT DO NOTHING;
+  EXCEPTION
+    WHEN foreign_key_violation THEN
+      RAISE EXCEPTION 'Авиалиния или аэропорт не существует';
   END;
 END;
 $$ LANGUAGE plpgsql;

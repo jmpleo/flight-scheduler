@@ -17,7 +17,9 @@ CREATE TABLE airline (
 
 CREATE TABLE aircraft (
   id SERIAL PRIMARY KEY,
-  model VARCHAR(50) NOT NULL UNIQUE
+  model VARCHAR(50) NOT NULL,
+  manufacturer VARCHAR(50) NOT NULL,
+  CONSTRAINT manufacturer_model UNIQUE(manufacturer, model)
 );
 
 CREATE TABLE flight (
