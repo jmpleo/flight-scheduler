@@ -3,10 +3,14 @@ from tkinter import ttk
 
 
 class View:
-    def __init__(self, root):
-        self.root = root
-        self.root.resizable(False, False)
-        self.root.title("Расписание рейсов")
+    def display(self, message):
+        print(message)
+
+    def __init__(self):#, root):
+        pass
+        #self.root = root
+        #self.root.resizable(False, False)
+        #self.root.title("Расписание рейсов")
 
     def ModifyForm(self, data):
         print(data)

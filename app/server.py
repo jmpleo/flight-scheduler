@@ -3,14 +3,13 @@ from socket import AF_INET, SOCK_STREAM
 
 from threading import Thread
 
-from controller import Controller
-
+from model import Model
 
 class Server:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.controller = Controller()
+        self.model = Model()
 
     def start(self):
         self.sock = socket.socket(AF_INET, SOCK_STREAM)
@@ -24,14 +23,13 @@ class Server:
     def handle_client(self, sock):
         try:
             request = sock.recv(1024).decode('utf-8')
-            self.controller.handle_request(request)
-            sock.send(b'OK')
+            self.model.set_data(*request.split())
+            sock.send(self.model.get_data())
         except Exception as e:
             print(e)
         finally:
             sock.close()
 
-
 if __name__ == '__main__':
-    server = Server('localhost', 8888)
+    server = Server('localhost', 8889)
     server.start()
