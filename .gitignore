@@ -2,3 +2,6 @@ app/template
 db/tmp.sql
 db/tmp.py
 
+db/fill-db-mod.py
+db/reset-db.sql
+db/drop-db.sql
