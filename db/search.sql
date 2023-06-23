@@ -1,32 +1,199 @@
-CREATE OR REPLACE FUNCTION search_flights_by_text (
-  cur_flight_info REFCURSOR,
+CREATE OR REPLACE FUNCTION search_city_by_text (
+  cur_city REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
 BEGIN
-  OPEN cur_flight_info FOR
+  OPEN cur_city FOR
+    SELECT id, name FROM city
+    WHERE name ILIKE '%' || search_text || '%';
+  RETURN cur_city;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_airline_by_text (
+  cur_airline REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_airline FOR
+    SELECT a.iata_code, a.name, a.website FROM airline a
+    WHERE a.name ILIKE '%' || search_text || '%'
+      OR a.website ILIKE '%' || search_text || '%'
+      OR a.iata_code ILIKE '%' || search_text || '%';
+  RETURN cur_airline;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_airport_by_text (
+  cur_airport REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_airport FOR
+    SELECT a.iata_code, a.name, c.name
+    FROM airport a
+      JOIN city c ON a.city_id = c.id
+    WHERE a.name ILIKE '%' || search_text || '%'
+      OR c.name ILIKE '%' || search_text || '%';
+  RETURN cur_airport;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_aircraft_by_text (
+  cur_aircraft REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_aircraft FOR
+    SELECT a.id, a.model, a.manufacturer FROM aircraft a
+    WHERE a.model ILIKE '%' || search_text || '%'
+      OR a.manufacturer ILIKE '%' || search_text || '%';
+  RETURN cur_aircraft;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_flight_by_text (
+  cur_flight REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_flight FOR
     SELECT
---      f.airline_code || '-' || f.flight_number::text AS flight_name,
+      f.id,
       f.flight_number,
       f.airline_code,
-    --  a.name AS airline_name,
-    --  a.website AS airline_website,
       ac.model AS aircraft_model,
+      f.from_airport,
+      f.to_airport
+    FROM flight f
+      JOIN aircraft ac ON f.aircraft_id = ac.id
+    WHERE
+      f.flight_number::text ILIKE '%' || search_text || '%'
+      OR ac.model ILIKE '%' || search_text || '%'
+      OR from_airport ILIKE '%' || search_text || '%'
+      OR to_airport ILIKE '%' || search_text || '%';
+  RETURN cur_flight;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_schedule_by_text (
+  cur_schedule REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_schedule FOR
+    SELECT
+      s.id,
+      f.airline_code || '-' || f.flight_number::text,
+      s.departure
+    FROM schedule s
+      JOIN flight f ON f.id = s.flight
+    WHERE
+      f.airline_code || '-' || f.flight_number::text ILIKE '%' || search_text || '%';
+  RETURN cur_schedule;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_schedule_by_date (
+  cur_schedule REFCURSOR,
+  departure_from TIMESTAMP,
+  departure_to TIMESTAMP
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_schedule FOR
+    SELECT
+      s.id,
+      f.airline_code || '-' || f.flight_number::text,
+      s.departure
+    FROM schedule s
+      JOIN flight f ON f.id = s.flight
+    WHERE
+      s.departure >= departure_from AND s.departure <= departure_to;
+  RETURN cur_schedule;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_status_by_text (
+  cur_status REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_status FOR
+    SELECT
+      st.id,
+      f.airline_code || '-' || f.flight_number::text,
       s.departure,
-    --  st.gate,
-    --  st.check_in,
-    --  st.takeoff,
-    --  st.arrival,
-    --  from_a.name AS from_airport_name,
-      from_a.iata_code AS from_airport_iata_code,
-    --  to_a.name AS to_airport_name,
-      to_a.iata_code AS to_airport_iata_code,
-      from_c.name AS from_city_name,
-      to_c.name AS to_city_name
+      st.gate,
+      st.check_in,
+      st.takeoff,
+      st.arrival
+    FROM status st
+      JOIN schedule s ON s.id = st.id
+      JOIN flight f ON f.id = s.flight
+    WHERE
+      f.airline_code || '-' || f.flight_number::text ILIKE '%' || search_text || '%'
+      OR st.gate::text ILIKE '%' || search_text || '%'
+      OR st.check_in ILIKE '%' || search_text || '%';
+  RETURN cur_status;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_status_by_date (
+  cur_status REFCURSOR,
+  departure_from TIMESTAMP,
+  departure_to TIMESTAMP
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_status FOR
+    SELECT
+      st.id,
+      f.airline_code || '-' || f.flight_number::text,
+      s.departure,
+      st.gate,
+      st.check_in,
+      st.takeoff,
+      st.arrival
+    FROM status st
+      JOIN schedule s ON s.id = st.id
+      JOIN flight f ON f.id = s.flight
+    WHERE
+      s.departure >= departure_from AND s.departure <= departure_to;
+    RETURN cur_status;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION search_flight_status_summary (
+  cur_status_summary REFCURSOR,
+  search_text VARCHAR DEFAULT ''
+) RETURNS REFCURSOR AS $$
+BEGIN
+  OPEN cur_status_summary FOR
+    SELECT
+      f.id,
+      f.flight_number,
+      f.airline_code,
+      f.airline_code || '-' || f.flight_number::text AS flight_fullname,
+      ac.manufacturer || ' ' || ac.model AS aircraft_fullname,
+      st.gate,
+      st.check_in,
+      st.takeoff,
+      st.arrival,
+      f.from_airport,
+      f.to_airport
     FROM flight f
       JOIN airline a ON f.airline_code = a.iata_code
       JOIN aircraft ac ON f.aircraft_id = ac.id
       JOIN schedule s ON f.id = s.flight
-      --JOIN status st ON s.id = st.id
+      JOIN status st ON s.id = st.id
       JOIN airport from_a ON f.from_airport = from_a.iata_code
       JOIN airport to_a ON f.to_airport = to_a.iata_code
       JOIN city from_c ON from_a.city_id = from_c.id
@@ -41,119 +208,39 @@ BEGIN
       OR from_a.iata_code ILIKE '%' || search_text || '%'
       OR to_a.iata_code ILIKE '%' || search_text || '%'
       OR from_c.name ILIKE '%' || search_text || '%'
-      OR to_c.name ILIKE '%' || search_text || '%';
-  RETURN cur_flight_info;
+      OR to_c.name ILIKE '%' || search_text || '%'
+      OR st.gate::text ILIKE '%' || search_text || '%'
+      OR st.check_in ILIKE '%' || search_text || '%';
+  RETURN cur_status_summary;
 END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_flights_by_date (
-  cur_flight_info REFCURSOR,
+CREATE OR REPLACE FUNCTION search_flight_status_summary (
+  cur_status_summary REFCURSOR,
   departure_from TIMESTAMP,
   departure_to TIMESTAMP
 ) RETURNS REFCURSOR AS $$
 BEGIN
-  OPEN cur_flight_info FOR
+  OPEN cur_status_summary FOR
     SELECT
+      f.id,
       f.flight_number,
       f.airline_code,
-    --  a.name AS airline_name,
-    --  a.website AS airline_website,
-      ac.model AS aircraft_model,
-      s.departure,
-    --  st.gate,
-    --  st.check_in,
-    --  st.takeoff,
-    --  st.arrival,
-    --  from_a.name AS from_airport_name,
-      from_a.iata_code AS from_airport_iata_code,
-    --  to_a.name AS to_airport_name,
-      to_a.iata_code AS to_airport_iata_code,
-      from_c.name AS from_city_name,
-      to_c.name AS to_city_name
-    FROM
-      flight f
-      JOIN airline a ON f.airline_code = a.iata_code
+      f.airline_code || '-' || f.flight_number::text AS flight_fullname,
+      ac.manufacturer || ' ' || ac.model AS aircraft_fullname,
+      st.gate,
+      st.check_in,
+      st.takeoff,
+      st.arrival,
+      f.from_airport,
+      f.to_airport
+    FROM flight f
       JOIN aircraft ac ON f.aircraft_id = ac.id
       JOIN schedule s ON f.id = s.flight
-    --JOIN status st ON s.id = st.id
-      JOIN airport from_a ON f.from_airport = from_a.iata_code
-      JOIN airport to_a ON f.to_airport = to_a.iata_code
-      JOIN city from_c ON from_a.city_id = from_c.id
-      JOIN city to_c ON to_a.city_id = to_c.id
+      JOIN status st ON s.id = st.id
     WHERE
-      f.departure >= departure_from AND f.departure <= departure_to;
-  RETURN cur_flight_info;
+      s.departure >= departure_from AND s.departure <= departure_to;
+  RETURN cur_status_summary;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION search_status_by_text (
-  cur_status_info REFCURSOR,
-  search_text VARCHAR DEFAULT ''
-) RETURNS REFCURSOR AS $$
-BEGIN
-  OPEN cur_status_info FOR
-    SELECT
---      f.airline_code || '-' || f.flight_number::text AS flight_name,
-      f.flight_number,
-      f.airline_code,
-      s.departure,
-      st.gate,
-      st.check_in,
-      st.takeoff,
-      st.arrival,
-      from_a.iata_code AS from_airport_iata_code,
-      to_a.iata_code AS to_airport_iata_code
-    FROM status st
-      JOIN schedule s ON st.id = s.id
-      JOIN flight f ON s.flight = f.id
-      JOIN airline a ON f.airline_code = a.iata_code
-      JOIN airport from_a ON f.from_airport = from_a.iata_code
-      JOIN airport to_a ON f.to_airport = to_a.iata_code
-      JOIN city from_c ON from_a.city_id = from_c.id
-      JOIN city to_c ON to_a.city_id = to_c.id
-    WHERE
-      f.flight_number::text ILIKE '%' || search_text || '%'
-      OR a.name ILIKE '%' || search_text || '%'
-      OR from_a.name ILIKE '%' || search_text || '%'
-      OR to_a.name ILIKE '%' || search_text || '%'
-      OR from_a.iata_code ILIKE '%' || search_text || '%'
-      OR to_a.iata_code ILIKE '%' || search_text || '%'
-      OR from_c.name ILIKE '%' || search_text || '%'
-      OR to_c.name ILIKE '%' || search_text || '%';
-  RETURN cur_status_info;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION search_status_by_date (
-  cur_status_info REFCURSOR,
-  departure_from TIMESTAMP,
-  departure_to TIMESTAMP
-) RETURNS REFCURSOR AS $$
-BEGIN
-  OPEN cur_status_info FOR
-    SELECT
---      f.airline_code || '-' || f.flight_number::text AS flight_name,
-      f.flight_number,
-      f.airline_code,
-      s.departure,
-      st.gate,
-      st.check_in,
-      st.takeoff,
-      st.arrival,
-      from_a.iata_code AS from_airport_iata_code
-    FROM status st
-      JOIN schedule s ON st.id = s.id
-      JOIN flight f ON s.flight = f.id
-      JOIN airline a ON f.airline_code = a.iata_code
-      JOIN airport from_a ON f.from_airport = from_a.iata_code
-      JOIN airport to_a ON f.to_airport = to_a.iata_code
-      JOIN city from_c ON from_a.city_id = from_c.id
-      JOIN city to_c ON to_a.city_id = to_c.id
-    WHERE
-      f.departure >= departure_from AND f.departure <= departure_to;
-  RETURN cur_flight_info;
-END;
-$$ LANGUAGE plpgsql;
-

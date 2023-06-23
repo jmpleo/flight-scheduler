@@ -25,8 +25,8 @@ CREATE TABLE aircraft (
 CREATE TABLE flight (
   id SERIAL PRIMARY KEY,
   flight_number INT NOT NULL,
-  aircraft_id INT NOT NULL REFERENCES aircraft(id),
   airline_code CHAR(2) NOT NULL REFERENCES airline(iata_code),
+  aircraft_id INT NOT NULL REFERENCES aircraft(id),
   to_airport CHAR(3) NOT NULL REFERENCES airport(iata_code),
   from_airport CHAR(3) NOT NULL REFERENCES airport(iata_code),
   CONSTRAINT number_airline UNIQUE (flight_number, airline_code)
