@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE OR REPLACE FUNCTION update_city (
   city_id INT, new_name VARCHAR(50) DEFAULT NULL
 ) RETURNS VOID AS $$
@@ -196,3 +198,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+END;

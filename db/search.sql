@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION search_city_by_text (
+BEGIN;
+
+CREATE OR REPLACE FUNCTION search_city (
   cur_city REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -11,7 +13,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_airline_by_text (
+CREATE OR REPLACE FUNCTION search_airline (
   cur_airline REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -26,7 +28,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_airport_by_text (
+CREATE OR REPLACE FUNCTION search_airport (
   cur_airport REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -42,7 +44,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_aircraft_by_text (
+CREATE OR REPLACE FUNCTION search_aircraft (
   cur_aircraft REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -56,7 +58,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_flight_by_text (
+CREATE OR REPLACE FUNCTION search_flight (
   cur_flight REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -81,7 +83,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_schedule_by_text (
+CREATE OR REPLACE FUNCTION search_schedule (
   cur_schedule REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -100,7 +102,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_schedule_by_date (
+CREATE OR REPLACE FUNCTION search_schedule (
   cur_schedule REFCURSOR,
   departure_from TIMESTAMP,
   departure_to TIMESTAMP
@@ -120,7 +122,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_status_by_text (
+CREATE OR REPLACE FUNCTION search_status (
   cur_status REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -140,13 +142,13 @@ BEGIN
     WHERE
       f.airline_code || '-' || f.flight_number::text ILIKE '%' || search_text || '%'
       OR st.gate::text ILIKE '%' || search_text || '%'
-      OR st.check_in ILIKE '%' || search_text || '%';
+      OR st.check_in::text ILIKE '%' || search_text || '%';
   RETURN cur_status;
 END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_status_by_date (
+CREATE OR REPLACE FUNCTION search_status (
   cur_status REFCURSOR,
   departure_from TIMESTAMP,
   departure_to TIMESTAMP
@@ -171,7 +173,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_flight_status_summary (
+CREATE OR REPLACE FUNCTION search_status_summary (
   cur_status_summary REFCURSOR,
   search_text VARCHAR DEFAULT ''
 ) RETURNS REFCURSOR AS $$
@@ -210,13 +212,13 @@ BEGIN
       OR from_c.name ILIKE '%' || search_text || '%'
       OR to_c.name ILIKE '%' || search_text || '%'
       OR st.gate::text ILIKE '%' || search_text || '%'
-      OR st.check_in ILIKE '%' || search_text || '%';
+      OR st.check_in::text ILIKE '%' || search_text || '%';
   RETURN cur_status_summary;
 END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION search_flight_status_summary (
+CREATE OR REPLACE FUNCTION search_status_summary (
   cur_status_summary REFCURSOR,
   departure_from TIMESTAMP,
   departure_to TIMESTAMP
@@ -244,3 +246,5 @@ BEGIN
   RETURN cur_status_summary;
 END;
 $$ LANGUAGE plpgsql;
+
+END;

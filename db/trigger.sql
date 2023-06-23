@@ -1,3 +1,5 @@
+BEGIN;
+
 -- init status
 CREATE OR REPLACE FUNCTION init_flight_status()
 RETURNS TRIGGER AS $$
@@ -38,3 +40,5 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER delete_status_after_delete_scheduled_flight
 AFTER DELETE ON schedule FOR EACH ROW EXECUTE FUNCTION delete_status();
+
+END;

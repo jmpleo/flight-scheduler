@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE city (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL UNIQUE
@@ -51,3 +53,5 @@ CREATE TABLE status (
 -- CREATE UNIQUE INDEX ON airline (name);
 -- CREATE UNIQUE INDEX ON airline (website);
 -- CREATE UNIQUE INDEX ON flight (airline_code, flight_number);
+--
+END;
