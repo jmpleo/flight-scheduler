@@ -1,0 +1,26 @@
+json_schema = {
+  "request": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string"
+      },
+      "data": {
+        "type": "array"
+      },
+      "required": ["action", "data"],
+      "additionalProperties": false
+  },
+  "response": {
+    "type": "object",
+    "properties": {
+      "form": {
+        "type": "string"
+      },
+      "data": {
+        "type": "array"
+      },
+      "required": ["action", "data"],
+      "additionalProperties": false
+  }
+}

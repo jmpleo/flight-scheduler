@@ -6,12 +6,14 @@ from datetime import datetime
 
 class Validator:
     def __init__(self):
-        pass
+        with open("schema.json", "r", encoding="utf-8") as f:
+            self.json_schema = json.load(f)
 
-    def validate_json_str(self, json_str, schema):
+    def validate_json(self, json_str: str, schema: str) -> bool:
         try:
             json.loads(json_str)
-            jsonschema.validate(instance=json.loads(json_str), schema=schema)
+            jsonschema.validate(instance=json.loads(json_str),
+                                schema=self.json_schema[schema])
             return True
         except (json.JSONDecodeError, jsonschema.exceptions.ValidationError):
             return False
