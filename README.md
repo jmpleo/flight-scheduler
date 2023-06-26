@@ -3,15 +3,15 @@
 ## Installation
 
 ```bash
-git clone https://github.com/jmpleo/flight-scheduler.git
+git clone [https://github.com/jmpleo/flight-scheduler.git|http://gitlab.com/1193221/flight-scheduler.git]
 cd flight-scheduler
 ```
 
-### 1. Create Database
+### 1. Init Database
 
 ``` bash
 cd db
-psql -f create-db.sql
+./init.sh
 ```
 
 ### 2. Fill Database
